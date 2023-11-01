@@ -1,0 +1,651 @@
+#pragma GCC optimize("unroll-loops")
+#pragma GCC optimize("O3")
+#pragma GCC target("avx2")
+#include <bits/stdc++.h>
+using namespace std;
+using namespace chrono;
+#define ll long long int
+#define in(a) long long int a;cin>>a;
+#define inn(a,b) long long int a,b;cin>>a>>b;
+#define innn(a,b,c) long long int a,b,c;cin>>a>>b>>c;
+#define out(a) cout<<a<<"\n";
+#define outt(a,b) cout<<a<<" "<<b<<"\n";
+#define outtt(a,b,c) cout<<a<<" "<<b<<" "<<c<<"\n";
+#define whil(t) while(t-->0)
+#define infor(variable,start,end) for(long long int variable=start;variable<end;variable++)
+#define defor(variable,start,end) for(long long int variable=start;variable>end;variable--)
+#define inefor(variable,start,end) for(long long int variable=start;variable<=end;variable++)
+#define deefor(variable,start,end) for(long long int variable=start;variable>=end;variable--)
+#define inarr(a,n) for(long long int i=0;i<n;i++){cin>>a[i];}
+#define outarr(a,n) for(long long int i=0;i<n;i++){cout<<a[i]<<" ";}cout<<"\n";
+#define vi(vi) vector<long long int>vi;
+#define invec(a,n) for(long long int i=0;i<n;i++){long long int r;cin>>r;a.push_back(r);}
+#define outvec(a,n) for(long long int i=0;i<n;i++){cout<<a[i]<<" ";}cout<<"\n";
+#define sortv(a) sort(a.begin(),a.end());
+#define sorta(a,n) sort(a,a+n);
+#define rev(a) reverse(a.begin(),a.end());
+#define minpriqueue(a) priority_queue <ll, vector<ll>, greater<ll>> a;
+#define countsetbit(n) __builtin_popcountll(n)
+#define ccmod 1000000007
+#define cfmod 998244353
+#define stoi(a) stoll(a, nullptr, 10)
+
+template<typename T> using minpriority_queue = priority_queue<T, vector<T>, greater<T>>;
+template<typename T> using maxpriority_queue = priority_queue<T>;
+
+/* stuff you should look for
+ * int overflow, array bounds
+ * special cases (n=1?)
+ * do smth instead of nothing and stay organized
+ * WRITE STUFF DOWN
+ * DON'T GET STUCK ON ONE APPROACH
+ */
+
+/*---------------------------------------------------DEBUG TOOLS--------------------------------------------------------------------------------------*/
+void __print(int x) {cout<<x;} void __print(long x) {cout<<x;} void __print(long long x) {cout<<x;}
+void __print(unsigned x) {cout << x;} void __print(unsigned long x) {cout << x;}
+void __print(unsigned long long x) {cout << x;} void __print(float x) {cout << x;} void __print(double x) {cout << x;}
+void __print(long double x) {cout << x;} void __print(char x) {cout << '\'' << x << '\'';} void __print(const char *x) {cout << '\"' << x << '\"';}
+void __print(const string &x) {cout << '\"' << x << '\"';} void __print(bool x) {cout << (x ? "true" : "false");}
+
+template<typename T, typename V>
+void __print(const pair<T, V> &x) {cout << '{'; __print(x.first); cout << ", "; __print(x.second); cout << '}';cout<<endl;}
+template<typename T>
+void __print(const T &x) {int f = 0; cout << '{'; for (auto &i: x) cout << (f++ ? ", " : ""), __print(i); cout << "}";cout<<endl;}
+void _print() {cout << "]\n";}
+template <typename T, typename... V>
+void _print(T t, V... v) {__print(t); if (sizeof...(v)) cout << ", "; _print(v...);cout<<endl;}
+#ifdef DEBUG
+#define debug(x...) cout << "\e[91m"<<__func__<<":"<<__LINE__<<" [" << #x << "] = ["; _print(x); cout << "\e[39m" << endl;
+#else
+#define debug(x...)
+#endif
+
+struct custom_hash
+{
+    static uint64_t splitmix64(uint64_t x)
+    {
+        // http://xorshift.di.unimi.it/splitmix64.c
+        x += 0x9e3779b97f4a7c15;
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+        return x ^ (x >> 31);
+    }
+ 
+    size_t operator()(uint64_t x) const
+    {
+        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
+        return splitmix64(x + FIXED_RANDOM);
+    }
+};
+
+ll customlog(ll n,ll base)
+{
+    ll expo=1;
+    ll pro=base;
+    while(pro<=n)
+    {
+        pro*=base;
+        expo++;
+    }
+    expo--;
+    return expo;
+}
+
+ll gcd(ll a,ll b)
+{
+    return b == 0 ? a : gcd(b, a % b);   
+}
+
+ll lcm(vector<ll>&arr)
+{
+    ll n=arr.size();
+    ll ans = arr[0]; 
+    infor(i,1,n) ans=(((arr[i] * ans)) / (gcd(arr[i], ans)));
+    return ans;
+}
+
+ll power(ll x,ll y)
+{
+    ll res = 1;
+    while (y > 0) {
+        if (y & 1)
+            res = res * x;
+        y = y >> 1;
+        x = x * x;
+    }
+    return res;
+}
+
+ll powermod(ll x,ll y,ll mod)
+{
+    ll res = 1;
+    while (y > 0) {
+        if (y & 1)
+            res = (res * x)%mod;
+        y = y >> 1;
+        x =( x * x)%mod;
+    }
+    return res;
+}
+
+#define Fact_Length 1000001
+
+ll Mod_Inv(ll a,ll mod)
+{
+    a%=mod;
+    a=powermod(a,mod-2,mod);
+    return a;
+}
+
+ll Factorial[Fact_Length];
+
+ll Make_Factorial(ll mod)
+{
+    Factorial[0]=1;
+    for(ll i=1;i<Fact_Length;i++)
+    { 
+        Factorial[i]=i*Factorial[i-1];
+        Factorial[i]%=mod; 
+    }
+    return 0;
+}
+
+// ll MOD=cfmod or ccmod
+ll Implement_Make_Factorial=Make_Factorial(MOD);
+
+ll nCr(ll n,ll r,ll mod)
+{
+    if(n<r) return 0;
+    ll ans=Factorial[n]; ans%=mod;
+    ans*=Mod_Inv(Factorial[r],mod);
+    ans%=mod;
+    ans*=Mod_Inv(Factorial[n-r],mod);
+    ans%=mod;
+    return ans;
+}
+
+ll nPr(ll n,ll r,ll mod)
+{
+    ll ans=Factorial[n];
+    ans%=mod;
+    ans*=Mod_Inv(Factorial[n-r],mod);
+    ans%=mod;
+    return ans;
+}
+
+ll mod_add(ll a, ll b,ll mod)
+{
+    a = a % mod;
+    b = b % mod;
+    return (((a + b) % mod) + mod) % mod;
+}
+ll mod_mul(ll a, ll b,ll mod)
+{
+    a = a % mod;
+    b = b % mod;
+    return (((a * b) % mod) + mod) % mod;
+}
+ll mod_sub(ll a, ll b,ll mod)
+{
+    a = a % mod;
+    b = b % mod;
+    return (((a - b) % mod) + mod) % mod;
+}
+
+string int2binary(ll num)
+{
+    string str= bitset<64>(num).to_string();
+    return str;
+}
+
+ll binary2int(string s)
+{
+    ll ans=0;
+    ll k=0;
+    for(ll i=s.size()-1;i>=0;i--)
+    {
+        if(s[i]=='1')
+        {
+            ans += (1 << k);
+        }
+        k++;
+    }
+    return ans;
+}
+
+pair<vector<ll>,vector<ll>>separevenodd(vector<ll>&vec)
+{
+    vector<ll>even,odd;
+    for(auto it:vec)
+    {
+        if(it&1) odd.emplace_back(it);
+        else even.emplace_back(it);
+    }
+    return {even,odd};
+}
+
+vector<ll>factors(ll n)
+{
+    vector<ll>fac;
+    for(ll i=1;i*i<=n;i++)
+    {
+        if(n%i==0)
+        {
+            fac.push_back(i);
+            if(i!=n/i) fac.emplace_back(n/i);
+        }
+    }
+    sortv(fac)
+    return fac;
+}
+
+vector<pair<ll,ll>>factorpair(ll n)
+{
+    vector<pair<ll,ll>>fac;
+    for(ll i=1;i*i<=n;i++)
+    {
+        if(n%i==0) fac.emplace_back(i,n/i);
+    }
+    return fac;
+}
+
+vector<bool>boolseive()
+{
+    ll N=1000001;
+    vector<bool>prime(N,true);
+    prime[0]=false;
+    prime[1]=false;
+    for(ll i=2;i<N;i++)
+    {
+        if(prime[i]==true)
+        {
+            for(ll j=2*i;j<N;j+=i) prime[j]=false;
+        }
+    }
+    return prime;
+}
+
+vector<ll>numseive()
+{
+    ll N=1000001;
+    vector<bool>prime(N,true);
+    prime[0]=false;
+    prime[1]=false;
+    for(ll i=2;i<N;i++)
+    {
+        if(prime[i]==true)
+        {
+            for(ll j=2*i;j<N;j+=i) prime[j]=false;
+        }
+    }
+    vector<ll>primee;
+    for(ll i=2;i<N;i++)
+    {
+        if(prime[i]==true) primee.emplace_back(i);
+    }
+    return primee;
+}
+
+#define MAXN 1000001
+ 
+vector<ll>spf(MAXN);
+ 
+ll sieve()
+{
+    spf[1]=1;
+    for(ll i=2;i<MAXN;i++) spf[i]=i;
+
+    for(ll i=4;i<MAXN;i+=2) spf[i]=2;
+ 
+    for(ll i=3;i*i<MAXN;i++)
+    {
+        if(spf[i]==i)
+        {
+            for(ll j=i*i;j<MAXN;j+=i)
+            {
+                if(spf[j]==j) spf[j]=i;
+            }
+        }
+    }
+    return 1;
+}
+
+vector<ll> getFactorization(ll x)
+{
+    vector<ll> ret;
+    while (x != 1)
+    {
+        ret.push_back(spf[x]);
+        x = x / spf[x];
+    }
+    return ret;
+}
+
+ll start=sieve();
+
+void merge(ll low,ll mid,ll high, vector<ll>&vec,ll &ans)
+{
+    ll i=low;
+    ll j=mid+1;
+    vector<ll>v;
+    while(i<=mid&&j<=high)
+    {
+        if(vec[i]<vec[j])
+        {
+            v.push_back(vec[i]);
+            i++;
+        }
+        else
+        {
+            ans+=(mid-i+1);
+            v.push_back(vec[j]);
+            j++;
+        }
+    }
+    while(i<=mid)
+    {
+        v.push_back(vec[i]);
+        i++;
+    }
+    while(j<=high)
+    {
+        v.push_back(vec[j]);
+        j++;
+    }
+    ll kk=low;
+    for(ll k=0;k<v.size();k++)
+    {
+        vec[kk++]=v[k];
+    }
+}
+
+void countinversions(ll low,ll high,vector<ll>&vec,ll &ans)
+{
+    if(low<high)
+    {
+        ll mid=(low+high) >> 1;
+        countinversions(low,mid,vec,ans);
+        countinversions(mid+1,high,vec,ans);
+        merge(low,mid,high,vec,ans);
+    }
+}
+
+void bfs(ll i,vector<vector<ll>>& adj,vector<ll>& bfsvisited)
+{
+    queue<ll>qu;
+    qu.push(i);
+    bfsvisited[i]=1;
+    while(qu.size()!=0)
+    {
+        ll node=qu.front();
+        qu.pop();
+        cout<<node<<" ";
+        for(ll i=0;i<adj[node].size();i++)
+        {
+            if(bfsvisited[adj[node][i]]==0)
+            {
+                qu.push(adj[node][i]);
+                bfsvisited[adj[node][i]]=1;
+            }
+        }
+    }
+}
+
+void dfs(ll root,vector<vector<ll>>& adj,vector<ll>& dfsvisited)
+{
+    cout<<root<<" ";
+    dfsvisited[root]=1;
+    for(ll i=0;i<adj[root].size();i++)
+    {
+        if(dfsvisited[adj[root][i]]==0)
+        {
+            dfs(adj[root][i],adj,dfsvisited);
+        }
+    }
+}
+
+void printadj(vector<vector<ll>>& adj)
+{
+    ll n=adj.size()-1;
+    for(ll i=1;i<=n;i++)
+    {
+        cout<<i<<"  ";
+        for(ll j=0;j<adj[i].size();j++) cout<<adj[i][j]<<" ";
+        out("")
+    }
+}
+
+vector<vector<ll>>up,adj;
+vector<ll>depth;
+ll n,logg;
+
+void precomp(ll v,ll p)
+{
+    depth[v]=depth[p]+1;
+    up[v][0]=p;
+    for(ll i=1;i<=logg;i++) up[v][i]=up[ up[v][i-1] ][i-1];
+    for(auto child:adj[v])
+    {
+        if(child==p) continue;
+        precomp(child,v);
+    }
+}
+ 
+ll lca(ll u,ll v)
+{
+    if(depth[u]<depth[v]) swap(u,v);
+    ll k=depth[u]-depth[v];
+    for(ll i=logg;i>=0;i--)
+    {
+        if(k & (1<<i)) u=up[u][i];
+    }
+    if(u==v) return u;
+    for(ll i=logg;i>=0;i--)
+    {
+        if(up[u][i]!=up[v][i])
+        {
+            u=up[u][i];
+            v=up[v][i];
+        }
+    }
+    return u==v ? u : up[u][0];
+}
+
+void reset(ll n)
+{
+    logg=0;
+    while((1<<logg) < n) logg++;
+    depth.assign(n,-1);
+    up.assign(n,vector<ll>(logg+1));
+    adj.assign(n,vector<ll>(0));
+}
+
+class DSU {
+    // ll *rank, *parent, n;
+    ll n;
+    vector<ll>rank,parent;
+    
+public:
+    DSU(ll n)
+    {
+        // rank = new ll[n];
+        // parent = new ll[n];
+        rank.resize(n);
+        parent.resize(n);
+        this->n = n;
+        makeSet();
+    }
+    void makeSet()
+    {
+        for (ll i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    ll find(ll x)
+    {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+  
+        return parent[x];
+    }
+    void Union(ll x, ll y)
+    {
+        ll xset = find(x);
+        ll yset = find(y);
+        if (xset == yset)
+            return;
+        if (rank[xset] < rank[yset]) {
+            parent[xset] = yset;
+        }
+        else if (rank[xset] > rank[yset]) {
+            parent[yset] = xset;
+        }
+        else {
+            parent[yset] = xset;
+            rank[xset] = rank[xset] + 1;
+        }
+    }
+};
+
+class charDSU {
+    // char *parent;
+    vector<char>parent;
+    
+public:
+    charDSU()
+    {
+        // parent = new char[26];
+        parent.resize(26);
+        makeSet();
+    }
+    void makeSet()
+    {
+        for (char ch='a';ch<='z';ch++) {
+            parent[(ll)(ch)-97] = ch;
+        }
+    }
+    char find(char x)
+    {
+        if (parent[(ll)(x)-97] != x) {
+            parent[(ll)(x)-97] = find(parent[(ll)(x)-97]);
+        }
+  
+        return parent[(ll)(x)-97];
+    }
+    void Union(char x, char y)
+    {
+        char xset = find(x);
+        char yset = find(y);
+        if (xset == yset)
+            return;
+        parent[(ll)(xset)-97] = yset;
+    }
+};
+
+struct segmenttree{
+    vector<ll>v;
+    vector<ll>tree;
+    ll n;
+    segmenttree(ll nn,vector<ll>vec)
+    {
+        v=vec;
+        n=nn;
+        tree.resize(4*n);
+        build(1,0,n-1);
+    }
+ 
+    ll combine(ll a,ll b)
+    {
+        ll c;
+        c=max(a,b);
+        return c;
+    }
+
+    void build(ll node,ll start,ll end)
+    {
+        if(start==end)
+        {
+            tree[node]=v[start];
+            return;
+        }
+        ll mid=(start+end) >> 1;
+        build(2*node,start,mid);
+        build(2*node+1,mid+1,end);
+        tree[node]=combine(tree[2*node],tree[2*node+1]);
+    }
+
+    void update(ll node,ll start,ll end,ll ind,ll val)
+    {
+        if(start==end)
+        {
+            v[start]=val;
+            tree[node]=v[start];
+            return;
+        }
+        ll mid=(start+end) >> 1;
+        if(ind<=mid) update(2*node,start,mid,ind,val);
+        else update(2*node+1,mid+1,end,ind,val);
+        tree[node]=combine(tree[2*node],tree[2*node+1]);
+    }
+
+    void update(ll ind,ll val)
+    {
+        update(1,0,n-1,ind,val);
+    }
+ 
+    ll query(ll node,ll start,ll end,ll l,ll r)
+    {
+        if(start>r || end<l) return -1e12;
+        else if(start>=l && end<=r) return tree[node];
+        ll mid=(start+end) >> 1;
+        ll left=query(2*node,start,mid,l,r);
+        ll right=query(2*node+1,mid+1,end,l,r);
+        return max(left,right);
+    }
+
+    ll query(ll l,ll r)
+    {
+        return query(1,0,n-1,l,r);
+    }
+};
+
+void precomp()
+{
+    
+}
+
+void solve()
+{
+    
+}
+
+int main() {
+    
+    #ifndef ONLINE_JUDGE
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+#endif
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    auto start1 = high_resolution_clock::now();
+
+    precomp();
+
+    in(t)
+    whil(t)
+    {
+        solve();
+    }
+
+    auto stop1 = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop1 - start1);
+    
+    #ifndef ONLINE_JUDGE
+        cerr << "Time: " << duration . count() << endl;
+    #endif
+
+}
